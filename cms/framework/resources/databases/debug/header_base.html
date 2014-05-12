@@ -1,0 +1,265 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<title>$title</title>
+		
+		<script type="text/javascript" src="framework/resources/jquery-1.5.1.js"></script>
+		<script type="text/javascript" src="framework/resources/databases/debug/jQuery.js"></script>
+		
+		<style>
+
+			* {
+				   padding: 0em;
+				   margin: 0em;
+			}
+
+			/* PAGE */
+
+			.page {
+				position: absolute;
+				top: 150px;
+				left: 75px;
+				margin: auto;
+				width: 854px;
+				color: #000000;
+				font-family: Tahoma, Helvetica, Sans-Serif;
+				font-size: 12px;
+				padding: 1em;
+			}
+
+			.page_fixedwidth {
+				background-color: #CCCCCC;
+				margin: 5px;
+				width: 854px;
+				color: #000000;
+				font-family: Tahoma, Helvetica, Sans-Serif;
+				font-size: 18px;
+				text-align: left;
+				padding: 0px;
+				border: none;
+				height: 150px;
+			}
+
+			.blog {
+				background-color: #EFEFEF;
+				font-size: 12px;
+				text-align: left;
+				border: 1px solid #CCCCCC;
+				height: 100%;
+				margin-bottom: 15px;
+			}
+			
+			.blogimg {
+				border: none;
+				float: left;
+				overflow: hidden;
+			}
+			
+			.showhide {
+				position: absolute;
+			}
+
+			.comment {
+				background-color: #F1F1F1;
+				font-size: 11px;
+				text-align: left;
+				border: 1px solid #000000;
+
+			}
+
+			.reply {
+				margin-left: 2%;
+				float: inherit;
+				background-color: #F1F1F1;
+				font-size: 11px;
+				text-align: left;
+				border: 1px solid #000000;
+				border-right: none;
+
+			}
+
+			.blogright {
+				background-color: #F1F1F1;
+				font-size: 10px;
+				float: right;
+				bottom: 5px;
+			}
+
+			.header {
+				position: absolute;
+				top: 100px;
+				left: 85px;
+				width: 854px;
+				padding: 1em;
+				text-align: left;
+				background-color: #F1F1F1;
+				border: 1px solid #000000;
+			}
+
+                        .beta {
+                            position: absolute;
+                            top: 25px;
+                            left: 70px;
+                            text-align: center;
+                            vertical-align: middle;
+                            border: 1px solid #3f6cb1;
+                            color: #3f6cb1;
+                            background-color: #96b6e6;
+                            width: 900px;
+                            height: 50px;
+                        }
+
+			html {
+				width: 100%;
+			}
+
+			body{
+				width: 100%;
+				text-align: center;
+				font-family: Tahoma, Helvetica, Sans-Serif;
+				font-size: 12px;
+				background-color: #F1F1F1;
+				color: #000000;
+				overflow: hidden;
+				line-height: 1.5em;
+			}
+
+			a {
+				text-decoration: none;
+				border: none;
+				color: #000000;
+			}
+
+			a:hover {
+				font-weight: bold;
+				color: #AAAAAA;
+			}
+
+			img {
+				 border: none;
+			}
+
+			strong{
+				font-weight: 700;
+			}
+
+			.heartbeat {
+				float: right;
+				font-size: 11px;
+			}
+			
+			.login {
+				background-color: #cccccc;
+				position: absolute;
+				left: 350px;
+				top: 150px;
+				border: 1px solid #000000;
+				z-index: 100;
+			}
+
+                        .newblog {
+                            background-color: #cccccc;
+                            position: absolute;
+                            left: 350px;
+                            top: 200px;
+                            border: 1px solid #000000;
+                            z-index: 100;
+                            display: none;
+                        }
+}
+
+			.menu {
+				visibility: hidden;
+				font-size: 100%;
+				position: absolute;
+			}
+
+			/******* /CONTENT *******/
+			/******* LOADING *******/
+			#loading{
+				text-align: center;
+			}
+			/******* /LOADING *******/
+			</style>
+				
+					
+	</head>
+	
+	<body>
+
+            <div class="beta" id="beta"><br />ALPHA v$mn_vers</div>
+
+	<div class="header" id="header">
+		<a href="index.php"><img src="$homeimg" alt="Go Home" width="24" /></a>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<a href="javascript:newblog()"><img src="$newblogimg" alt="New Blog" width="24" /></a>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<a href="settings.php"><img src="$settingsimg" alt="" width="24" /></a>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <a href="$loglink" id="log" onMouseOver="javascript:login(false)"><img src="$logimg" alt="" width="24" /></a> <span id="loggeduser"><b>$username</b></span>
+			
+		<span class="heartbeat" id="heartbeat" style="font-weight: bold;"></span>
+		
+	</div>
+	
+	<div class="login" id="login" style="visibility:hidden;">
+		<form action="login.php">
+			<table cellspacing="3" cellpadding="3" width="100%" border="0">
+				<tr>
+					<td>lang[username]</td>
+					<td><input type="text" name="username" id="username" /></td>
+				</tr>
+				
+				<tr>
+					<td>lang[password]</td>
+					<td><input type="text" name="password" id="password" /></td>
+				</tr>
+				
+				<!--<tr>
+					<td colspan="2" align="center"> <input type="image" src="$logimg" width="$imgw" /></td>
+				</tr>-->
+			</table>
+		</form>
+	</div>
+
+            <div class="newblog" id="newblog">
+                <form action="" id="write">
+                    <table cellpadding="0" cellspacing="3" border="0" width="700">
+                        <tr>
+                            <td>
+                                Blog Name
+                            </td>
+                            <td>
+                                <input type="text" name="title" size="96" />
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                Blog Image
+                            </td>
+                            <td>
+                                <input type="text" name="image" size="96"/ disabled>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                Blog Post<br />
+                            </td>
+                            <td>
+                                <textarea cols="73" rows="10" name="blogpost"></textarea>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="2">
+                                <a href="javascript:saveBlog()"><img src="$saveimg" alt="" width="32" /></a>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+	
+	<div class="page">
