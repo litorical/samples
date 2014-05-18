@@ -1,9 +1,8 @@
 <?php
-
-#define('PHP_VER',	'5.0.0');
-
-//printf("Inital memory imprint: %s.<br />", memory_get_usage());
+//printf("Inital memory imprint: %s.<br />", serverinfo::bytes(memory_get_usage()));
 $mem = memory_get_usage();
+
+define('PHP_VER',	'5.0.0');
 
 // call the footer function even if there's an error somewhere.
 register_shutdown_function('footer');
@@ -21,6 +20,7 @@ if (defined('GZIP')) {
 }
 
 $global['mn_vers'] = '0.2.0';
+
 
 // now call the required language
 // but for now, we only have English support.
@@ -43,38 +43,15 @@ global $global;
 $global['title'] = '3bird Framework';
 
 $si = new serverinfo();
-//$si = new session();
 
-$temp = new tmp4('default');
-//if ($temp->test_database() == false) {
+$temp = new tmp4();
 $temp->test_database();
-if ( isset($temp->error) ) {
-	echo $temp->error;
-}
-
-function footer() {
-    global $mem;
-    // memory usage.
-    // good for debugging!
-    //$memused = number_format(memory_get_usage() - $mem, 0, '.', ',');
-    //$mempeak = number_format(memory_get_peak_usage() - $mem, 0, '.', ',');
-    $memused = memory_get_usage() - $mem;
-    $mempeak = memory_get_peak_usage() - $mem;
-    $memused = serverinfo::bytes($memused);
-    $mempeak = serverinfo::bytes($mempeak);
-    printf("Memory Usage: %s (Peak: %s).", $memused, $mempeak);
-    unset($memused);
-    unset($mempeak);
-}
 
 // initiate other databases
 // this uses the template class because it already has the database functions setup
 // no point in reinventing the wheel.
 $content = new sqli('content');
-if ($content->test_database() == false) {
-	echo $content->error;
-	//die();
-}
+$content->test_database();
 
 // We need to set up some basic image variables
 $global['imgw'] = 64;
@@ -99,6 +76,19 @@ if ( isset($si->sess[$sessname])) {
         $global['username'] = 'Guest';
 }
 
-$temp->fetch('header_base');
+$temp->fetch_temp('header_base');
+
+function footer() {
+    global $mem;
+    // memory usage.
+    // good for debugging!
+    $memused = memory_get_usage() - $mem;
+    $mempeak = memory_get_peak_usage() - $mem;
+    $memused = serverinfo::bytes($memused);
+    $mempeak = serverinfo::bytes($mempeak);
+    printf("Memory Usage: %s (Peak: %s).", $memused, $mempeak);
+    unset($memused);
+    unset($mempeak);
+}
 
 ?>

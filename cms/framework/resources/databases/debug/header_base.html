@@ -84,6 +84,7 @@
 				font-size: 10px;
 				float: right;
 				bottom: 5px;
+                                vertical-align: bottom;
 			}
 
 			.header {
@@ -174,6 +175,10 @@
 				font-size: 100%;
 				position: absolute;
 			}
+                        
+                        .hidden {
+                            visibility: hidden;
+                        }
 
 			/******* /CONTENT *******/
 			/******* LOADING *******/
@@ -188,7 +193,7 @@
 	
 	<body>
 
-            <div class="beta" id="beta"><br />ALPHA v$mn_vers</div>
+            <!--<div class="beta" id="beta"><br />ALPHA v$mn_vers</div>-->
 
 	<div class="header" id="header">
 		<a href="index.php"><img src="$homeimg" alt="Go Home" width="24" /></a>
@@ -216,9 +221,9 @@
 					<td><input type="text" name="password" id="password" /></td>
 				</tr>
 				
-				<!--<tr>
+				<tr>
 					<td colspan="2" align="center"> <input type="image" src="$logimg" width="$imgw" /></td>
-				</tr>-->
+				</tr>
 			</table>
 		</form>
 	</div>

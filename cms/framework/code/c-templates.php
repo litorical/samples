@@ -1,5 +1,8 @@
 <?php
 /*
+ * V5.0
+ * Version 4 was, well, useless. Let's combine v4 with v3 shall we?
+ * DUMPING V4.0...
 Templates V4.0
 This version uses SQLite...and HTML.
 
@@ -36,30 +39,45 @@ EG.
 */
 error_reporting(E_ALL ^ E_NOTICE);
 
+//define('SQLITE',                        true);          // use SQLITE?
 define('TMP_DEBUG',			true);		// set debugging for easy editing, aka html data
-define('TMP_VERS',			'4.0');		// don't allow legacy templates to be used.
+define('TMP_VERS',			'5.0');		// don't allow legacy templates to be used.
+
+if (defined('SQLITE')) {
+    // For debugging purposes this is set wrong.
+    if (defined('EDITOR')) {
+            define('TMP_DATA', 		'shared/templates/');
+    } else {
+            define('TMP_DATA',			'framework/shared/templates/');
+    }
+}
 
 class sqli {
 	public				$error		= '';
 	public				$db		= '';
-        public                          $query          = '';
-	
-	//
+        public                          $query_string   = '';
+        public                          $dbType         = 0;
+
+
+        //
 	// logerror
 	//
 	private function logerror() {
 		global $cfg;
 
                 // sanity check - need to send this error somewhere
-                if (strlen($cfg['errorlog'] < 5))
+                if (strlen($cfg['errorlog'] < 5)) {
                     $cfg['errorlog'] = 'error.log';
+                }
 
                 // also check for time format!
-                if (strlen($cfg['time4'] < 3))
+                if (strlen($cfg['time4'] < 3)) {
                     $cfg['time4'] = 'm.d.Y h:i:s A';
+                }
 
-		if (isset($this->error)) {
-                    //$this->error .= "\n";		// append a new line to every error logged.
+		//if (isset($this->error)) {
+                if (strlen($this->error > 3)) {
+                    $this->error .= "\n";		// append a new line to every error logged.
                     $debug = debug_backtrace();
                     $this->error = sprintf("[%s]::[%s:%s](%s::%s): %s\r\n", date($cfg['time4'], time()), $debug[1]['file'], $debug[1]['line'], $debug[1]['class'], $debug[1]['function'], $this->error);
 
@@ -71,8 +89,9 @@ class sqli {
 
         public function throwError($error, $type=E_ERROR) {
             // need to have an error to throw an error right?
-            if (strlen($error) <= 4)
+            if (strlen($error) <= 4) {
                 return;
+            }
 
             if ($type == E_NOTICE) {
                 $this->error = sprintf("[NOTICE] %s", $error);
@@ -91,9 +110,9 @@ class sqli {
 	//
 	// rmd5
 	//
-	/*private function rmd5($string) {
+	private function rmd5($string) {
 		return md5(strrev($string));
-	}*/
+	}
 	
 	//
 	// test_database
@@ -104,7 +123,7 @@ class sqli {
 			return true;
                 } else {
                     $this->error = 'Testing of database failed!';
-                    $this->logerror();
+                    $this->throwError(E_WARNING);
                     return false;
                 }
 	}
@@ -112,28 +131,38 @@ class sqli {
 	//
 	// constructor
 	//
-	public function __construct($db='default') {
+	public function __construct($db='default', $dbt=1) {
 		global $cfg;
 		// the dbname should be set here.
                 // ajax requires a different path...yet the same!
-                if (defined('AJAX')) {
-                       $dbname = sprintf("../%s/databases/%s.db", $cfg['workingdir'], $db);
-                } else {
-                    $dbname = sprintf("%s/databases/%s.db", $cfg['workingdir'], $db);
+                if ($dbt == 2) {        // SQLITE = DBTYPE 2
+                    if (defined('AJAX')) {
+                           $dbname = sprintf("../%s/databases/%s.db", $cfg['workingdir'], $db);
+                    } else {
+                        $dbname = sprintf("%s/databases/%s.db", $cfg['workingdir'], $db);
+                    }
+
+                    // create a new database instance.
+                    //if ( ($db = new SQLiteDatabase($dbname, 0666, $this->error) ) == true ) {
+                    if ( ($db = new SQLite3($dbname ) ) == true )  {
+                        $this->db = $db;
+                    } else {
+                        $this->throwError($this->error, E_ERROR);
+                    }
+                } else {        // MySQL = DBTYPE 1
+                    // a little hacky but whatever...
+                    if (defined('TMP_DEBUG') && $db == 'default') {
+                        return;
+                    }
+                    
+                    // connect to a MySQL database instead
+                    if ( ($db= new mysqli($cfg['sqlhost'], $cfg['sqluser'], $cfg['sqlpass'], $db) ) == true ) {
+                        $this->db = $db;
+                    } else {
+                        $this->throwError($this->error, E_ERROR);
+                    }
                 }
 		
-		// create a new database instance.
-                if ( ($db = new SQLiteDatabase($dbname, 0666, $this->error) ) == true ) {
-                    $this->db = $db;
-                } else {
-                    $this->throwError($this->error, E_ERROR);
-                }
-		
-		/*// check for a problem.
-		$this->logerror();
-		
-		// now actually set the database!
-		$this->db = $db;*/
 		unset($db);
 	}
 	
@@ -154,57 +183,69 @@ class sqli {
 	//
 	// query
 	//
-	public function query($query) {
-		$this->query = $this->db->query($query, $SQLITE_ASSOC, $this->error);
-		
-		// special case
-		// to let us know a problem occurred
-		/*if (isset($this->error)) {
-			$this->query = $this->error;
-		}*/
-		
-		//$this->logerror();
-                $this->throwError($this->error, E_ERROR);
-		
-		return $this->query;
+	public function query($query, $ret=true) {
+            // AJAX doesn't play nice
+            if (defined('AJAX')) {
+                $query = $this->db->query($query);
+                return $query;
+            } else {
+                $this->query_string = $this->db->query($query);                
+                if ($ret == true) {
+                    return $this->query_string;
+                }
+            }
 	}
+        
+        //
+        // setQuery
+        //
+        public function setQuery($query) {
+            $this->query_string = $query;
+        }
 	
 	//
 	// numrows
 	//
-	public function numRows($query) {
-		$rows = $this->query($query);
-		return $rows->numRows();
+	public function numRows($query, $doquery=true) {
+                if ($this->dbType == 2) {
+                    if ($doquery == true) {
+                        $query = str_replace(" * ", " COUNT(*) ", $query);
+                        $this->query_string = $this->query($query);
+                    }
+                    return $this->fetchArray($this->query_string);
+                } else {
+                    return $query->num_rows;
+                }
 	}
 	
 	//
 	// fetch
 	//
-	public function fetch($query) {
-		$fetch = $this->query($query);
-		return $fetch->fetch();
+	public function fetch($query, $doquery=true) {
+            // we're not actually using the data that's being passed here...
+            // except with ajax
+            // Everything else is using data that gets stored in the object
+            // THIS NEEDS TO BE FIXED!!
+            if ($doquery == true) {
+            /* @var $fetch type */
+                $this->query_string = $this->query($query);
+            }
+
+        if ($this->dbType == 2) {
+		return $this->query_string->fetchArray();
+            } else {
+                if (defined('AJAX')) {
+                    return $query->fetch_array();
+                } else {
+                    return $this->query_string->fetch_array();
+                }
+            }
 	}
-};
+}
 
 class tmp4 extends sqli {
 	public				$tmp_data		= array();
-	public				$extradata		= '';
-	/*public				$error		= '';
-	
-	//
-	// logerror
-	//
-	private function logerror($line=__LINE__) {
-		global $cfg;
-		if (isset($this->error)) {
-			//$this->error .= "\n";		// append a new line to every error logged.
-			$debug = debug_backtrace();
-			$this->error = sprintf("[%s:%s](%s::%s): %s\n", $debug[1]['file'], $debug[1]['line'], $debug[1]['class'], $debug[1]['function'], $this->error);
-			
-			error_log($this->error, 3, $cfg['errorlog']);
-			unset($this->error);
-		}
-	}*/
+	public				$extradata		= '';	
 	
 	//
 	// deconstructor
@@ -259,19 +300,19 @@ class tmp4 extends sqli {
 	//
 	// fetch
 	//
-	public function fetch($template, $save=false) {
+	public function fetch_temp($template, $save=false) {
 		global $cfg;
 		
 		// When debugging we just get HTML files (They're a lot easier to edit).
-		if (defined('TMP_DEBUG') && TMP_DEBUG != false) {
+		if (defined('TMP_DEBUG') /*&& TMP_DEBUG != false*/) {       // why would this be set to false?
 			$fp = fopen(sprintf("%s/databases/debug/%s.html", $cfg['workingdir'], $template), 'r');
-			$contents = @stripslashes(stream_get_contents($fp));
-			@fclose($fp);
+			$contents = stripslashes(stream_get_contents($fp));
+			fclose($fp);
 			
 			// see if it actually exists.
 			if (strlen($contents) < 2) {
-				$this->error = sprintf("Specified template %s does not exist.", $template);
-				$this->logerror();
+				//$this->error = sprintf("Specified template %s does not exist.", $template);
+				$this->throwError(sprintf("specified template %s does not exist.", $template), E_WARNING);
 			}
 			
 			// BEFORE PASSING IT ON
@@ -288,13 +329,15 @@ class tmp4 extends sqli {
 			}
 			
 			// and also...smilies!
+                        // ummm...later...
 				
 			
 			// return the template
-			if ($save == true)
+			if ($save == true) {
 				return $contents;
-			else
+                        } else {
 				$this->tmp_data[$template] .= $contents;
+                        }
 			return true;
 		} else {
 			// otherwise pull them from a database
@@ -304,14 +347,14 @@ class tmp4 extends sqli {
 			// Now check if we actually have anything.
 			if ($temp->numRows() >= 1) {
 				// We found it!
-				$temp = $temp->fetch();
+				$temp = $temp->fetch_temp();
 			} else {
 				// ok...we didn't find it, try the templateid now.
 				$temp = parent::query(sprintf("SELECT * FROM templates WHERE tid='%s'", $template));
 				
 				if ($temp->numRows() >= 1) {
 					// We found it!
-					$temp = $temp->fetch();
+					$temp = $temp->fetch_temp();
 				} else {
 					// The template wasn't found :(
 					$this->error = sprintf("Specified template %s does not exist.", $template);
@@ -325,8 +368,8 @@ class tmp4 extends sqli {
 			// This is important so we don't allow templates from previous versions to be used.
 			// Since we've made drastic changes to the system.
 			if ($temp['tver'] != TMP_VERS) {
-				$this->error = sprintf("Mismatched template found. Template version %s found, expecting %s.", $temp['tver'], TMP_VERS);
-				$this->logerror();
+				//$this->error = sprintf("Mismatched template found. Template version %s found, expecting %s.", $temp['tver'], TMP_VERS);
+				$this->ThrowError(sprintf("Mismatched template found. Template version %s found, expecting %s.", $temp['tver'], TMP_VERS), E_WARNING);
 				return false;
 			}
 				
@@ -354,4 +397,4 @@ class tmp4 extends sqli {
 			}
 		}
 	}			
-};
+}

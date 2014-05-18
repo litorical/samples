@@ -46,7 +46,8 @@ $users = new sqli('content');
 
 // open the user database and try to find a match.
 $user = $users->query("SELECT * FROM users");
-while ($userdat = $user->fetch()) {
+
+while ($userdat = $users->fetch($user, false)) {
     if ( $si->vars['username'] == $userdat['username'] && md5($si->vars['password']) == $userdat['password']) {
         //$_SESSION[$sessname] = $userdat['uid'];
         //$si->sess[$sessname] = $userdat['uid'];

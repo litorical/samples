@@ -11,4 +11,8 @@ $cfg['offset']		= -18000;
 
 $cfg['sessname']        = '3sess';
 
+$cfg['sqluser']         = 'root';
+$cfg['sqlpass']         ='';
+$cfg['sqlhost']         = 'localhost';
+
 ?>

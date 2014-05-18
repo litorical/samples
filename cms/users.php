@@ -13,7 +13,7 @@ $global['uid'] = $user['uid'];
 
 if ($notfriend) {
 	// need to add this user as a friend to see their profile.
-	$temp->fetch('users_addfriend');
+	$temp->fetch_temp('users_addfriend');
 }
 
 ?>

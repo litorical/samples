@@ -12,6 +12,31 @@ if (defined('DEBUG'))
 	error_reporting(E_ALL);
 else
 	error_reporting(E_ALL ^ E_NOTICE);
+
+/*class eHandle extends Exception {
+    protected $severity;
+    
+    public function __construct($message, $code, $severity, $filename, $lineno) {
+        $this->message = $message;
+        $this->code = $code;
+        $this->severity = $severity;
+        $this->file = $filename;
+        $this->line = $lineno;
+        
+        ini_set('log_errors', true);        
+        ini_set('error_log', './error.log');
+    }
+    
+    public function getSeverity() {
+        return $this->severity;
+    }
+}
+
+function exception_error_handler($errno, $errstr, $errfile, $errline ) {
+    throw new eHandle($errstr, 0, $errno, $errfile, $errline);
+}
+
+set_error_handler("exception_error_handler", E_ALL ^ E_NOTICE);*/
 	
 	
 /***************************************************
@@ -362,7 +387,7 @@ class serverinfo {
         // bytes
         // convert bytes to something more readable
         //
-        public function bytes($bytes, $format=true) {
+        static function bytes($bytes, $format=true) {
             // 1kb = 1024 bytes
             // 1mb = 1,048,576 bytes
             // 1gb = 1,073,741,824 bytes
@@ -491,40 +516,3 @@ class serverinfo {
         }
     }
 };
-
-
-// 05.29.2011: combined the two classes...it makes more sense this way!
-/*class session extends serverinfo {
-    public      $sess;
-
-    public function __construct() {
-        session_start();
-
-        $this->sess = $_SESSION;
-        unset($_SESSION);
-    }
-
-    public function exists($session) {
-        if (isset($this->sess[$session]) || isset($_SESSION[$session])) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public function set($key, $value) {
-        if (isset($this->sess[$key]) || isset($_SESSION[$key])) {
-            return;
-        } else {
-            $_SESSION[$key] = $value;
-            $this->sess[$key] = $value;
-        }
-    }
-
-    public function destroy($session) {
-        if (isset($this->sess[$session]) || isset($_SESSION[$session])) {
-            unset($this->sess[$session]);
-            unset($_SESSION[$session]);
-        }
-    }
-};*/

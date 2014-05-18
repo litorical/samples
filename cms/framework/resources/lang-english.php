@@ -38,6 +38,7 @@ $lang['login'] = 'Login';
 $lang['said'] = 'said';
 $lang['replied'] = 'replied';
 $lang['comments'] = 'Comments';
+$lang['nforums'] = 'To Discuss this post head on over to our forums';
 
 
 //

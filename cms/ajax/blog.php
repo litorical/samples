@@ -23,17 +23,20 @@ $si  = new serverinfo();
 // no point in reinventing the wheel.
 $content = new sqli('content');
 if ($content->test_database() == false) {
-	echo $content->error;
-	//die();
+	die();
 }
 
 // TODO: user needs to be logged in and have permission to write to this blog!
 
-if (strlen($si->vars['title']) > 8 && strlen($si->vars['blogpost']) > 24) {
-    // save the blog :)
-    $content->db->query(sprintf("INSERT INTO blogs VALUES (NULL, '%s', '%s', '%s', '%s', '1')", $si->sess[$sessname], sqlite_escape_string($si->vars['title']), sqlite_escape_string($si->vars['blogpost']), time() ), SQLITE_ASSOC, $content->error);
-    echo $content->error;
+if (isset($si->sess[$sessname])) {
+    if (strlen($si->vars['title']) > 8 && strlen($si->vars['blogpost']) > 24) {
+        // save the blog :)
+        $content->db->query(sprintf("INSERT INTO blogs VALUES (NULL, '%s', '%s', '%s', '%s', '1')", $si->sess[$sessname], sqlite_escape_string($si->vars['title']), sqlite_escape_string($si->vars['blogpost']), time() ));
+        //echo $content->error;
+    } else {
+        echo "STRLEN";
+    }
 } else {
-    echo "STRLEN";
+    echo "You need to be logged in to perform this action.";
 }
 ?>

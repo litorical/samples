@@ -40,6 +40,27 @@ function saveBlog() {
 
 jQuery(document).ready(function($) {
         setInterval(blink, 1000);
+        
+        $('div.blog').dblclick(function() {
+            //alert('dlb');
+            $('div.blog').html("<textarea cols=100 rows=7>" + $('div.hidden').html());
+            $('div.hidden').html("");
+        });
+        
+        $('html').click(function(e) {
+            if ($(e.target).attr('id') === 'blog') {
+                //alert('CLICK!');
+            } else {
+                //alert('NO CLICK!');
+                if ($('div.hidden').html() == '') {
+                    $('div.blog').html('<br /><br /><center><h1>Your item has been saved!</h1></center>');
+                }
+            }
+        });
+        
+        $('div.blog').blur(function() {
+            alert('OUT');
+        });
 
 
 	$('header.img').hide().each(function(i) {
@@ -93,6 +114,7 @@ jQuery(document).ready(function($) {
                                success: function(msg) {
                                    if (msg == 'EPIC FAIL!OK!') {
                                        $('#login').fadeOut(500);
+                                       location.reload(); // refresh the page
                                    }
                                }
                             })
